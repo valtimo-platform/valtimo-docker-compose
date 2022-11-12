@@ -1,0 +1,39 @@
+version: '3.9'
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:17.0.1-legacy
+    container_name: keycloak
+    ports:
+      - 8081:8080
+    environment:
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+      KEYCLOAK_IMPORT: /opt/jboss/keycloak/imports/valtimo-realm.json
+    volumes:
+      - ./imports/keycloak:/opt/jboss/keycloak/imports
+  valtimo-database:
+    container_name: valtimo-database
+    image: mysql/mysql-server:8.0.28-1.2.7-server
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: valtimo
+      MYSQL_USER: valtimo
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_HOST: "%"
+    command: [
+      "--default-authentication-plugin=mysql_native_password",
+      "--lower_case_table_names=1",
+      "--collation-server=utf8mb4_unicode_ci",
+      "--character-set-server=utf8mb4",
+      "--explicit_defaults_for_timestamp",
+      "--ssl=false",
+      "--innodb_flush_method=O_DIRECT",
+      "--sql_mode=NO_ENGINE_SUBSTITUTION"
+    ]
+    volumes:
+      - valtimo-database-data:/var/lib/mysql # persist data even if container shuts down
+
+volumes:
+  valtimo-database-data:
