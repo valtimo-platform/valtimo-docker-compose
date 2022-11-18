@@ -32,4 +32,3 @@ services:
       - KEYCLOAK_LOGOUT_REDIRECT_URI=http://localhost/
       - WHITELISTED_DOMAIN=http://localhost/
       - KEYCLOAK_REDIRECT_URI=http://localhost/keycloak/callback
-      - OPENZAAK_CATALOGUS_ID=8225508a-6840-413e-acc9-6422af120db1
