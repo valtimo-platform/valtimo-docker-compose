@@ -1,0 +1,35 @@
+version: '3.9'
+services:
+  valtimo_backend:
+    image: ritense/valtimo-backend:9.24.0.RELEASE
+    container_name: valtimo_backend
+    ports:
+      - 8080:8080
+    depends_on:
+      -   valtimo-database
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://${DOCKER_GATEWAY_HOST:-host.docker.internal}:3306/valtimo
+      - SPRING_DATASOURCE_NAME=valtimo
+      - SPRING_DATASOURCE_USERNAME=valtimo
+      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING-ACTUATOR_PASSWORD=password
+      - SPRING_PROFILES_ACTIVE=docker
+      - CAMUNDA_BPM_ADMIN-USER_PASSWORD=password
+      - VALTIMO_JWT_SECRET=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAooyECQIi6v4TLKOYWwXClDhJcrGcGfKZj7LQIgY/Ajm2nAKv5kiZRoS8GzMzIGKkkilAJyWQCoKlP//azHqzIxO6WZWCqGFxd04vK5JYujsiMMTNvTggfFSM7VxbzU/wv+aAEvBaGUMYp2Oamn5szzYzkzsowujvDZp+CE8ryZWTVmA+8WZE4aoU6VzfXmMDmPxvRXvktPRsJkA7hkv65TTJwUZF38goRg62kRD0hOP1sIy6vwKDSkjafLV1bYNBRiWXNReJNBXauhy74GeiHODGrI62NwUJXSgZ62cViPt6cx/3A7VBPLpEPnpnlZcIDfsFpSUuNEXc7HoLRuldbQIDAQAB
+      - KEYCLOAK_REALM=valtimo
+      - KEYCLOAK_AUTH-SERVER-URL=http://${DOCKER_GATEWAY_HOST:-host.docker.internal}:8081/auth
+      - KEYCLOAK_RESOURCE=valtimo-user-m2m-client
+      - KEYCLOAK_CREDENTIALS_SECRET=3ce18f4c-6506-42cf-8e0d-3f98b88635e3
+  valtimo_frontend:
+    image: ritense/valtimo-frontend:5.13.0
+    container_name: valtimo_frontend
+    ports:
+      - 80:80
+    environment:
+      - KEYCLOAK_URL=http://localhost:8081/auth
+      - KEYCLOAK_REALM=valtimo
+      - KEYCLOAK_CLIENT_ID=valtimo-console
+      - KEYCLOAK_LOGOUT_REDIRECT_URI=http://localhost/
+      - WHITELISTED_DOMAIN=http://localhost/
+      - KEYCLOAK_REDIRECT_URI=http://localhost/keycloak/callback
+      - OPENZAAK_CATALOGUS_ID=8225508a-6840-413e-acc9-6422af120db1
