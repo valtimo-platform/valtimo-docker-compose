@@ -42,62 +42,12 @@ services:
       volumes:
           - valtimo-database-data:/var/lib/postgres # persist data even if container shuts down
 
-  #zgw
-  openzaak:
-      image: openzaak/open-zaak:1.7.5
-      container_name: openzaak
-      platform: linux/amd64
-      profiles:
-          - zgw
-          - openzaak
-      environment:
-          - DB_HOST=openzaak-database
-          - DB_POST=5433
-          - SECRET_KEY=veryRestrictedSecretKey
-          - DB_USER=openzaak
-          - DB_PASSWORD=openzaak
-          - DB_NAME=openzaak
-          - CACHE_DEFAULT=redis:6379/0
-          - CACHE_AXES=redis:6379/0
-          - DEBUG=true
-          - ALLOWED_HOSTS=localhost,host.docker.internal,172.17.0.1,openzaak
-          - OPENZAAK_SUPERUSER_USERNAME=admin
-          - OPENZAAK_SUPERUSER_EMAIL=admin@admin.org
-          - DJANGO_SUPERUSER_PASSWORD=admin
-          - SENDFILE_BACKEND=django_sendfile.backends.simple
-      ports:
-          - "8001:8000"
-      depends_on:
-          -   openzaak-database
-          -   redis
-
-  openzaak-database:
-      image: mdillon/postgis:11
-      container_name: openzaak-database
-      platform: linux/amd64
-      profiles:
-          - zgw
-          - openzaak
-      environment:
-          - POSTGRES_USER=openzaak
-          - POSTGRES_PASSWORD=openzaak
-          - POSTGRES_DB=openzaak
-      volumes:
-          - ./imports/open-zaak:/docker-entrypoint-initdb.d
-
-  redis:
-      image: redis:6.2.6
-      container_name: redis
-      profiles:
-          - zgw
-          - openzaak
-
+  #objecten
   objecten-api:
       image: maykinmedia/objects-api:2.1.1
       container_name: objecten-api
       platform: linux/amd64
       profiles:
-          - zgw
           - objecten
       ports:
           - "8010:8000"
@@ -117,7 +67,6 @@ services:
       container_name: objecten-api-database
       platform: linux/amd64
       profiles:
-          - zgw
           - objecten
       environment:
           - POSTGRES_USER=objects
@@ -129,7 +78,6 @@ services:
       container_name: objects-api-import
       platform: linux/amd64
       profiles:
-          - zgw
           - objecten
       environment: *objects-env
       # in the current version of django it is not possible to create a new user with password without user interaction by using the createsuperuser command
@@ -145,7 +93,6 @@ services:
       container_name: objecttypen-api
       platform: linux/amd64
       profiles:
-          - zgw
           - objecten
       ports:
           - "8011:8000"
@@ -164,7 +111,6 @@ services:
         image: postgres:14.1
         container_name: objecttypen-api-database
         profiles:
-            - zgw
             - objecten
         environment:
             - POSTGRES_USER=objecttypes
@@ -177,7 +123,6 @@ services:
       container_name: objecttypen-api-import
       platform: linux/amd64
       profiles:
-          - zgw
           - objecten
       environment: *objecttypes-env
       command: sh init/init.sh
