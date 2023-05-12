@@ -1,16 +1,32 @@
-# Getting started
-## Prerequisites
+# valtimo-docker-compose
+## Getting started
+### Requirements
 - [Docker Desktop](https://docs.docker.com/desktop/install/)
 - [Docker Compose](https://docs.docker.com/compose/install/)
 
-## Running Docker Compose
+### Starting up
+This repository offers two options for starting up the supporting services for Valtimo:
+- Including the Objects API and Objecttypes API
+- Keycloak and database only
 
-### Starting your own Valtimo implementation
-The supporting-services.yaml file contains all supporting services required by Valtimo. By default, this file is used by Docker Compose.
-When creating a new GZAC implementation, only this file is needed to start up the supporting services. 
-Execute the following command in a terminal:
-```docker compose up -d```
+### Including the Objects API and Objecttypes API
+Execute the following command: `docker compose --profile objecten up -d`
 
-### Start as Docker containers
-When starting Valtimo as Docker Containers, both the supporting-services.yaml and the valtimo.yaml file should be used. This can be done by combining the files into one command. Execute the following command in a terminal:
-```docker compose -f supporting-services.yaml -f valtimo.yaml up -d```
+The following services will be started:
+| Service   |      Mapped port      |
+|----------|:-------------:|
+| Valtimo database (postgres) |  54320         |
+| Keycloak |  8081         |
+| Keycloak database (postgres) |    -   |
+| Objecten API | 8010 |
+| Objecten API database (postgis) | - |
+| Objecttypen API | 8011 |
+| Objecttypen API database (postgres) | - |
+
+### Keycloak and database only
+Execute the following command: `docker compose up -d`
+| Service   |      Mapped port      |
+|----------|:-------------:|
+| Valtimo database (postgres) |  54320         |
+| Keycloak |  8081         |
+| Keycloak database (postgres) |    -   |
