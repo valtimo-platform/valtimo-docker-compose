@@ -42,6 +42,13 @@ services:
       volumes:
           - valtimo-database-data:/var/lib/postgres # persist data even if container shuts down
 
+  #valtimo redis
+  redis:
+      container_name: valtimo-redis
+      image: redis:7.2.1
+      ports:
+          - "6379:6379"
+
   #objecten
   objecten-api:
       image: maykinmedia/objects-api:2.1.1
