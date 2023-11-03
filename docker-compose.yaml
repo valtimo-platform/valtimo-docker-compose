@@ -228,21 +228,16 @@ services:
       container_name: open-notificaties-rabbitmq
       profiles:
           - gzac
-      expose:
-          - 5673
-          - 15673
       ports:
           - "5673:5673"
           - "15673:15673"
 
-  open-notificaties:
+  open-notificaties-celery:
       image: openzaak/open-notificaties:1.4.3
       container_name: open-notificaties
       platform: linux/amd64
       profiles:
           - gzac
-      ports:
-          - "8002:8000"
       environment: &notificaties-env
           - DJANGO_SETTINGS_MODULE=nrc.conf.docker
           - SECRET_KEY=${SECRET_KEY:-4wHY2Cp5`4(q%)]cuWxPQJRp5kN?g+`.Xah>%6Fsq6+)R>p_}
@@ -256,20 +251,31 @@ services:
           - DB_PASSWORD=notifications
           - DEBUG=true
           - RABBITMQ_HOST=open-notificaties-rabbitmq
-          - PUBLISH_BROKER_URL=redis://open-notificaties-redis:6379/0
-          - CELERY_BROKER_URL=redis://open-notificaties-redis:6379/0
-          - CELERY_RESULT_BACKEND=redis://open-notificaties-redis:6379/0
+          - PUBLISH_BROKER_URL=amqp://guest:guest@rabbitmq:5673/%2F
+          - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5673//
+          - CELERY_RESULT_BACKEND=redis://open-notificaties-redis:6379/1
           - CELERY_LOGLEVEL=DEBUG
           - CELERY_WORKER_CONCURRENCY=${CELERY_WORKER_CONCURRENCY:-4}
+          - SUBPATH=${SUBPATH:-/}
+      command: /celery_worker.sh
+      depends_on:
+          - open-notificaties-database
+          - open-notificaties-rabbitmq
+          - open-notificaties-redis
 
-  open-notificaties-celery:
+  open-notificaties:
       image: openzaak/open-notificaties:1.4.3
       container_name: open-notificaties-celery
       platform: linux/amd64
       profiles:
           - gzac
+      ports:
+          - "8002:8000"
       environment: *notificaties-env
-      command: /celery_worker.sh
+      depends_on:
+          - open-notificaties-database
+          - open-notificaties-rabbitmq
+          - open-notificaties-redis
 
   open-notificaties-database:
       image: postgres:13.5  # open-notificaties doesn't work with postgres 14.
