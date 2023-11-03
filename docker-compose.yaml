@@ -251,8 +251,8 @@ services:
           - DB_PASSWORD=notifications
           - DEBUG=true
           - RABBITMQ_HOST=open-notificaties-rabbitmq
-          - PUBLISH_BROKER_URL=amqp://guest:guest@rabbitmq:5673/%2F
-          - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5673//
+          - PUBLISH_BROKER_URL=amqp://guest:guest@open-notificaties-rabbitmq:5673/%2F
+          - CELERY_BROKER_URL=amqp://guest:guest@open-notificaties-rabbitmq:5673//
           - CELERY_RESULT_BACKEND=redis://open-notificaties-redis:6379/1
           - CELERY_LOGLEVEL=DEBUG
           - CELERY_WORKER_CONCURRENCY=${CELERY_WORKER_CONCURRENCY:-4}
