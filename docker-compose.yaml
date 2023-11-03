@@ -229,8 +229,8 @@ services:
       profiles:
           - gzac
       ports:
-          - "5673:5673"
-          - "15673:15673"
+          - "5673:5672"
+          - "15673:15672"
 
   open-notificaties-celery:
       image: openzaak/open-notificaties:1.4.3
