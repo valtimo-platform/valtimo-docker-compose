@@ -15,12 +15,12 @@ Execute the following command: `docker compose --profile objecten up -d`
 The following services will be started:
 | Service                    | Mapped port |
 |----------------------------|:-----------:|
-| gzac-database              | 54320       |
-| gzac-database-mysql        | 33060       |
-| gzac-keycloak-database     | 54329       |
-| gzac-keycloak              | 8081        |
-| gzac-rabbitmq              | 15672       |
-| gzac-rabbitmq              | 5672        |
+| valtimo-database           | 54320       |
+| valtimo-database-mysql     | 33060       |
+| valtimo-keycloak-database  | 54329       |
+| valtimo-keycloak           | 8081        |
+| valtimo-rabbitmq           | 15672       |
+| valtimo-rabbitmq           | 5672        |
 | objecten-api-database      | 54321       |
 | objecten-api               | 8010        |
 | objecttypen-api-database   | 54324       |
