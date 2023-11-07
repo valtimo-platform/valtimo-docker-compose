@@ -9,24 +9,28 @@ This repository offers two options for starting up the supporting services for V
 - Including the Objects API and Objecttypes API
 - Keycloak and database only
 
-### Including the Objects API and Objecttypes API
-Execute the following command: `docker compose --profile objecten up -d`
+### Starting everything
 
-The following services will be started:
-| Service   |      Mapped port      |
-|----------|:-------------:|
-| Valtimo database (postgres) |  54320         |
-| Keycloak |  8081         |
-| Keycloak database (postgres) |    -   |
-| Objecten API | 8010 |
-| Objecten API database (postgis) | - |
-| Objecttypen API | 8011 |
-| Objecttypen API database (postgres) | - |
+Execute the following command to start all available docker containers: 
 
-### Keycloak and database only
-Execute the following command: `docker compose up -d`
-| Service   |      Mapped port      |
-|----------|:-------------:|
-| Valtimo database (postgres) |  54320         |
-| Keycloak |  8081         |
-| Keycloak database (postgres) |    -   |
+```
+docker compose --profile gzac up -d
+```
+
+Execute the following command to stop the docker containers:
+
+```
+docker compose --profile gzac down -d
+```
+
+### Start Valtimo with Objects API and Objecttypes API only
+
+```
+docker compose --profile objecten up -d
+```
+
+### Start Valtimo with Keycloak and database only
+
+```
+docker compose up -d
+```
