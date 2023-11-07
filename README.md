@@ -9,28 +9,30 @@ This repository offers two options for starting up the supporting services for V
 - Including the Objects API and Objecttypes API
 - Keycloak and database only
 
-### Starting everything
+### Including the Objects API and Objecttypes API
+Execute the following command: `docker compose --profile objecten up -d`
 
-Execute the following command to start all available docker containers: 
+The following services will be started:
+| Service                    | Mapped port |
+|----------------------------|:-----------:|
+| valtimo-database           | 54320       |
+| valtimo-database-mysql     | 33060       |
+| valtimo-keycloak-database  | 54329       |
+| valtimo-keycloak           | 8081        |
+| valtimo-rabbitmq           | 15672       |
+| valtimo-rabbitmq           | 5672        |
+| objecten-api-database      | 54321       |
+| objecten-api               | 8010        |
+| objecttypen-api-database   | 54324       |
+| objecttypen-api            | 8011        |
 
-```
-docker compose --profile gzac up -d
-```
-
-Execute the following command to stop the docker containers:
-
-```
-docker compose --profile gzac down -d
-```
-
-### Start Valtimo with Objects API and Objecttypes API only
-
-```
-docker compose --profile objecten up -d
-```
-
-### Start Valtimo with Keycloak and database only
-
-```
-docker compose up -d
-```
+### Keycloak and database only
+Execute the following command: `docker compose up -d`
+| Service                    | Mapped port |
+|----------------------------|:-----------:|
+| valtimo-database           | 54320       |
+| valtimo-database-mysql     | 33060       |
+| valtimo-keycloak-database  | 54329       |
+| valtimo-keycloak           | 8081        |
+| valtimo-rabbitmq           | 15672       |
+| valtimo-rabbitmq           | 5672        |
