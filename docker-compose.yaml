@@ -78,10 +78,10 @@ services:
           - "5672:5672"
           - "15672:15672"
 
-  valtimo_backend:
+  valtimo-backend:
       image: ritense/valtimo-backend:11.3.1.RELEASE
       platform: linux/amd64
-      container_name: valtimo_backend
+      container_name: valtimo-backend
       profiles:
           - valtimo
       environment:
@@ -100,6 +100,21 @@ services:
           - KEYCLOAK_CREDENTIALS_SECRET=6ef6ca16-6b86-482a-a3d9-0561704c1db9
       ports:
           - 8080:8080
+
+  valtimo-frontend:
+      image: ritense/valtimo-frontend:11.3.1
+      platform: linux/amd64
+      container_name: valtimo-frontend
+      profiles:
+          - valtimo
+      environment:
+          - KEYCLOAK_URL=http://localhost:8081/auth
+          - KEYCLOAK_REALM=valtimo
+          - KEYCLOAK_CLIENT_ID=valtimo-console
+          - KEYCLOAK_REDIRECT_URI=http://localhost/keycloak
+          - KEYCLOAK_LOGOUT_REDIRECT_URI=http://localhost
+      ports:
+          - 80:8080
 volumes:
   valtimo-database-data:
   valtimo-database-data-mysql:
