@@ -49,6 +49,8 @@ services:
       image: mysql/mysql-server:8.0.28-1.2.7-server
       ports:
           - "33060:3306"
+      profiles:
+          - mysql
       environment:
           MYSQL_ROOT_PASSWORD: password
           MYSQL_DATABASE: valtimo
