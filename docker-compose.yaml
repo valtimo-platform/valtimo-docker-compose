@@ -81,7 +81,7 @@ services:
           - "15672:15672"
 
   valtimo-backend:
-      image: ritense/valtimo-backend:12.4.0
+      image: ritense/valtimo-backend:12.5.1
       container_name: valtimo-backend
       profiles:
           - valtimo
@@ -106,7 +106,7 @@ services:
           - 8080:8080
 
   valtimo-frontend:
-      image: ritense/valtimo-frontend:12.4.0
+      image: ritense/valtimo-frontend:12.5.1
       container_name: valtimo-frontend
       profiles:
           - valtimo
