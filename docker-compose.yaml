@@ -1,31 +1,31 @@
-version: '3.9'
 services:
   # Valtimo core
 
   valtimo-keycloak:
       container_name: valtimo-keycloak
+      image: quay.io/keycloak/keycloak:24.0.5
       depends_on:
           - valtimo-keycloak-database
-      image: quay.io/keycloak/keycloak:17.0.1-legacy
+      command:
+          - start-dev
+          - --import-realm
       ports:
           - "8081:8080"
       environment:
-          KEYCLOAK_USER: admin
-          KEYCLOAK_PASSWORD: admin
-          DB_VENDOR: postgres
-          DB_ADDR: valtimo-keycloak-database
-          DB_USER: keycloak
-          DB_PASSWORD: keycloak
+          KEYCLOAK_ADMIN: admin
+          KEYCLOAK_ADMIN_PASSWORD: admin
+          KC_DB: postgres
+          KC_DB_URL_HOST: valtimo-keycloak-database
+          KC_DB_USER: keycloak
+          KC_DB_PASSWORD: keycloak
+          KC_HTTP_RELATIVE_PATH: /auth
+          KC_FILE: /opt/jboss/keycloak/imports/realm.json
       volumes:
           - ./imports/keycloak:/opt/jboss/keycloak/imports
-      command:
-          - "-Dkeycloak.migration.action=import"
-          - "-Dkeycloak.migration.provider=singleFile"
-          - "-Dkeycloak.migration.file=/opt/jboss/keycloak/imports/realm.json"
-          - "-Dkeycloak.migration.strategy=IGNORE_EXISTING"
+
   valtimo-keycloak-database:
-      image: postgres:14.1
       container_name: valtimo-keycloak-database
+      image: postgres:14.1
       ports:
           - "54329:5432"
       environment:
@@ -71,8 +71,8 @@ services:
           - valtimo-database-data-mysql:/var/lib/mysql # persist data even if container shuts down
 
   valtimo-rabbitmq:
-      image: rabbitmq:3-management
       container_name: valtimo-rabbitmq
+      image: rabbitmq:3-management
       volumes:
           - ./imports/valtimo-rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
           - ./imports/valtimo-rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
@@ -81,8 +81,8 @@ services:
           - "15672:15672"
 
   valtimo-backend:
-      image: ritense/valtimo-backend:12.6.0
       container_name: valtimo-backend
+      image: ritense/valtimo-backend:12.6.0
       profiles:
           - valtimo
       environment:
@@ -106,8 +106,8 @@ services:
           - 8080:8080
 
   valtimo-frontend:
-      image: ritense/valtimo-frontend:12.6.0
       container_name: valtimo-frontend
+      image: ritense/valtimo-frontend:12.6.0
       profiles:
           - valtimo
       environment:
