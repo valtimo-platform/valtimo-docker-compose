@@ -6,11 +6,11 @@
 
 ### Starting up
 This repository offers two options for starting up the supporting services for Valtimo:
-- Including the Objects API and Objecttypes API
+- Including the Valtimo backend and frontend
 - Keycloak and database only
 
-### Including the Objects API and Objecttypes API
-Execute the following command: `docker compose --profile objecten up -d`
+### Including Valtimo images
+Execute the following command: `docker compose --profile valtimo up -d`
 
 The following services will be started:
 | Service                    | Mapped port |
@@ -21,10 +21,8 @@ The following services will be started:
 | valtimo-keycloak           | 8081        |
 | valtimo-rabbitmq           | 15672       |
 | valtimo-rabbitmq           | 5672        |
-| objecten-api-database      | 54321       |
-| objecten-api               | 8010        |
-| objecttypen-api-database   | 54324       |
-| objecttypen-api            | 8011        |
+| valtimo-backend            | 8080        |
+| valtimo-frontend           | 80          |
 
 ### Keycloak and database only
 Execute the following command: `docker compose up -d`
