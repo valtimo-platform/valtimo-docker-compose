@@ -1,31 +1,37 @@
-version: '3.9'
+name: valtimo-docker-compose
+
 services:
   # Valtimo core
 
   valtimo-keycloak:
-      container_name: valtimo-keycloak
+      container_name: valtimo-docker-compose-valtimo-keycloak
       depends_on:
           - valtimo-keycloak-database
-      image: quay.io/keycloak/keycloak:17.0.1-legacy
+      image: quay.io/keycloak/keycloak:24.0.1
       ports:
           - "8081:8080"
       environment:
-          KEYCLOAK_USER: admin
-          KEYCLOAK_PASSWORD: admin
-          DB_VENDOR: postgres
-          DB_ADDR: valtimo-keycloak-database
-          DB_USER: keycloak
-          DB_PASSWORD: keycloak
+          KEYCLOAK_ADMIN: admin
+          KEYCLOAK_ADMIN_PASSWORD: admin
+          KC_DB: postgres
+          KC_DB_URL: jdbc:postgresql://valtimo-keycloak-database/keycloak
+          KC_DB_USERNAME: keycloak
+          KC_DB_PASSWORD: keycloak
+          KC_FEATURES: token-exchange,admin-fine-grained-authz
+          KC_HTTP_RELATIVE_PATH: /auth
       volumes:
-          - ./imports/keycloak:/opt/jboss/keycloak/imports
-      command:
-          - "-Dkeycloak.migration.action=import"
-          - "-Dkeycloak.migration.provider=singleFile"
-          - "-Dkeycloak.migration.file=/opt/jboss/keycloak/imports/realm.json"
-          - "-Dkeycloak.migration.strategy=IGNORE_EXISTING"
+          - ./imports/keycloak:/opt/keycloak/data/import
+      command: "start-dev --import-realm"
+      healthcheck:
+          test: ['CMD-SHELL', '[ -f /tmp/HealthCheck.java ] || echo "public class HealthCheck { public static void main(String[] args) throws java.lang.Throwable { System.exit(((java.net.HttpURLConnection)new java.net.URL(args[0]).openConnection()).getResponseCode() == 200 ? 0 : 1); } }" > /tmp/HealthCheck.java && java /tmp/HealthCheck.java http://localhost:8080/auth']
+          interval: 10s
+          timeout: 5s
+          retries: 5
+          start_period: 5s
+
   valtimo-keycloak-database:
-      image: postgres:14.1
-      container_name: valtimo-keycloak-database
+      image: postgres:17.4
+      container_name: valtimo-docker-compose-valtimo-keycloak-database
       ports:
           - "54329:5432"
       environment:
@@ -33,8 +39,8 @@ services:
           POSTGRES_PASSWORD: keycloak
 
   valtimo-database:
-      container_name: valtimo-database
-      image: postgres:14.1
+      container_name: valtimo-docker-compose-valtimo-database
+      image: postgres:17.4
       ports:
           - "54320:5432"
       environment:
@@ -45,7 +51,7 @@ services:
           - valtimo-database-data:/var/lib/postgres # persist data even if container shuts down
 
   valtimo-database-mysql:
-      container_name: valtimo-database-mysql
+      container_name: valtimo-docker-compose-valtimo-database-mysql
       image: mysql/mysql-server:8.0.28-1.2.7-server
       ports:
           - "33060:3306"
@@ -57,22 +63,22 @@ services:
           MYSQL_USER: valtimo
           MYSQL_PASSWORD: password
           MYSQL_ROOT_HOST: "%"
-      command: [
-          "--default-authentication-plugin=mysql_native_password",
-          "--lower_case_table_names=1",
-          "--collation-server=utf8mb4_unicode_ci",
-          "--character-set-server=utf8mb4",
-          "--explicit_defaults_for_timestamp",
-          "--ssl=false",
-          "--innodb_flush_method=O_DIRECT",
-          "--sql_mode=NO_ENGINE_SUBSTITUTION"
-      ]
+      command:
+          --default-authentication-plugin=mysql_native_password
+          --lower_case_table_names=1
+          --collation-server=utf8mb4_unicode_ci
+          --character-set-server=utf8mb4
+          --explicit_defaults_for_timestamp
+          --ssl=false
+          --innodb_flush_method=O_DIRECT
+          --sql_mode=NO_ENGINE_SUBSTITUTION
+          --transaction-isolation=READ-COMMITTED
       volumes:
           - valtimo-database-data-mysql:/var/lib/mysql # persist data even if container shuts down
 
   valtimo-rabbitmq:
       image: rabbitmq:3-management
-      container_name: valtimo-rabbitmq
+      container_name: valtimo-docker-compose-valtimo-rabbitmq
       volumes:
           - ./imports/valtimo-rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
           - ./imports/valtimo-rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
@@ -81,33 +87,40 @@ services:
           - "15672:15672"
 
   valtimo-backend:
-      image: ritense/valtimo-backend:12.6.0
-      container_name: valtimo-backend
+      image: ritense/valtimo-backend:12.15.1
+      container_name: valtimo-docker-compose-valtimo-backend
       profiles:
           - valtimo
       environment:
-          - SPRING_PROFILES_ACTIVE=docker
+          - SPRING_PROFILES_ACTIVE=dev
           - SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:54320/valtimo
           - SPRING_DATASOURCE_NAME=valtimo
           - SPRING_DATASOURCE_USERNAME=valtimo
           - SPRING_DATASOURCE_PASSWORD=password
           - VALTIMO_APP_HOSTNAME=http://localhost:4200
           - VALTIMO_CONNECTORENCRYPTION_SECRET=579156b12b9a457a579156b12b9a457a
-          - VALTIMO_OAUTH_PUBLIC_KEY=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAooyECQIi6v4TLKOYWwXClDhJcrGcGfKZj7LQIgY/Ajm2nAKv5kiZRoS8GzMzIGKkkilAJyWQCoKlP//azHqzIxO6WZWCqGFxd04vK5JYujsiMMTNvTggfFSM7VxbzU/wv+aAEvBaGUMYp2Oamn5szzYzkzsowujvDZp+CE8ryZWTVmA+8WZE4aoU6VzfXmMDmPxvRXvktPRsJkA7hkv65TTJwUZF38goRg62kRD0hOP1sIy6vwKDSkjafLV1bYNBRiWXNReJNBXauhy74GeiHODGrI62NwUJXSgZ62cViPt6cx/3A7VBPLpEPnpnlZcIDfsFpSUuNEXc7HoLRuldbQIDAQAB
-          - KEYCLOAK_REALM=valtimo
-          - KEYCLOAK_AUTH_SERVER_URL=http://host.docker.internal:8081/auth
-          - KEYCLOAK_RESOURCE=valtimo-user-m2m-client
-          - KEYCLOAK_CREDENTIALS_SECRET=6ef6ca16-6b86-482a-a3d9-0561704c1db9
+          - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWKSETURI=http://host.docker.internal:8081/auth/realms/valtimo/protocol/openid-connect/certs
+          - SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAKAPI_ISSUERURI=http://host.docker.internal:8081/auth/realms/valtimo
+          - SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAKJWT_ISSUERURI=http://host.docker.internal:8081/auth/realms/valtimo
+          - SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAKJWT_CLIENTID=valtimo-console
+          - SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAKAPI_CLIENTID=valtimo-user-m2m-client
+          - SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAKAPI_CLIENTSECRET=6ef6ca16-6b86-482a-a3d9-0561704c1db9
+          - VALTIMO_PLUGIN_ENCRYPTION-SECRET=abcdefghijklmnop
           - VALTIMO_WEB_CORS_CORSCONFIGURATION_ALLOWEDORIGINS=http://localhost
           - VALTIMO_WEB_CORS_CORSCONFIGURATION_ALLOWEDMETHODS=*
           - VALTIMO_WEB_CORS_CORSCONFIGURATION_ALLOWEDHEADERS=*
           - VALTIMO_WEB_CORS_PATHS=/**
+          - VALTIMO_DOCKER_FILTER_ENABLED=true
+          - VALTIMO_DOCKER_FILTER_PORTS=8080,8001,8002,8003,8006,8010,8011
       ports:
           - 8080:8080
+      depends_on:
+          valtimo-keycloak:
+              condition: service_healthy
 
   valtimo-frontend:
-      image: ritense/valtimo-frontend:12.6.0
-      container_name: valtimo-frontend
+      image: ritense/valtimo-frontend:12.15.1
+      container_name: valtimo-docker-compose-valtimo-frontend
       profiles:
           - valtimo
       environment:
@@ -119,6 +132,9 @@ services:
           - KEYCLOAK_LOGOUT_REDIRECT_URI=http://localhost
       ports:
           - 80:8080
+      depends_on:
+          - valtimo-backend
+
 volumes:
   valtimo-database-data:
   valtimo-database-data-mysql:
